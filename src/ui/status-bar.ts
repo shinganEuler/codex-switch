@@ -44,11 +44,3 @@ export function updateProfileStatus(
 export function getStatusBarItem(): vscode.StatusBarItem {
   return statusBarItem
 }
-
-export function bounceStatusBarItem(): void {
-  if (!statusBarItem) return
-  statusBarItem.hide()
-  setTimeout(() => {
-    statusBarItem.show()
-  }, 10)
-}

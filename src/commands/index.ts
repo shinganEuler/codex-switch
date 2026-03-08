@@ -3,7 +3,6 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { ProfileManager } from '../auth/profile-manager'
 import { getDefaultCodexAuthPath, loadAuthDataFromFile } from '../auth/auth-manager'
-import { bounceStatusBarItem } from '../ui/status-bar'
 
 /**
  * Register all extension commands
@@ -98,7 +97,6 @@ export function registerCommands(
       if (!ok) return
 
       await onAuthChanged()
-      bounceStatusBarItem()
       await maybeReloadWindowAfterProfileSwitch()
     },
   )
@@ -106,11 +104,21 @@ export function registerCommands(
   const toggleLastProfileCommand = vscode.commands.registerCommand(
     'codex-switch.profile.toggleLast',
     async () => {
-      const newId = await profileManager.toggleLastProfileId()
-      if (!newId) {
-        await vscode.commands.executeCommand('codex-switch.profile.switch')
+      const profiles = await profileManager.listProfiles()
+      if (profiles.length === 0) {
+        await vscode.commands.executeCommand('codex-switch.profile.manage')
         return
       }
+
+      const activeId = await profileManager.getActiveProfileId()
+      const currentIndex = profiles.findIndex((p) => p.id === activeId)
+      const nextIndex =
+        currentIndex === -1
+          ? 0
+          : (currentIndex + 1) % profiles.length
+      const ok = await profileManager.setActiveProfileId(profiles[nextIndex].id)
+      if (!ok) return
+
       await onAuthChanged()
       await maybeReloadWindowAfterProfileSwitch()
     },
