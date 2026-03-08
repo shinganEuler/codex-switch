@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { ProfileManager } from '../auth/profile-manager'
 import { getDefaultCodexAuthPath, loadAuthDataFromFile } from '../auth/auth-manager'
+import { bounceStatusBarItem } from '../ui/status-bar'
 
 /**
  * Register all extension commands
@@ -97,6 +98,7 @@ export function registerCommands(
       if (!ok) return
 
       await onAuthChanged()
+      bounceStatusBarItem()
       await maybeReloadWindowAfterProfileSwitch()
     },
   )
