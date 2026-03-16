@@ -8,6 +8,7 @@ import {
   loadAuthDataFromFile,
   shouldUseWslAuthPath,
 } from '../auth/auth-manager'
+import { closeStatusBarTooltip } from '../ui/status-bar'
 
 /**
  * Register all extension commands
@@ -115,6 +116,7 @@ export function registerCommands(
       }
       await onAuthChanged()
       await maybeReloadWindowAfterProfileSwitch()
+      closeStatusBarTooltip()
     },
   )
 
