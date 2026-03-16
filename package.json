@@ -14,6 +14,7 @@
     "vscode:prepublish": "npm run compile",
     "vscode:publish": "vsce publish",
     "compile": "tsc -p ./",
+    "lint:md": "markdownlint-cli2",
     "vscode:package": "vsce package",
     "watch": "tsc -watch -p ./"
   },
@@ -128,6 +129,7 @@
   "devDependencies": {
     "@types/node": "24.x",
     "@types/vscode": "^1.105.1",
+    "markdownlint-cli2": "^0.21.0",
     "typescript": "^5.9.3",
     "vsce": "^2.15.0"
   },
