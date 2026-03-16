@@ -30,11 +30,17 @@ function parseJWT(token: string): any {
 }
 
 /**
+ * Resolve default Codex home path.
+ */
+export function getDefaultCodexHomePath(): string {
+  return process.env.CODEX_HOME || path.join(os.homedir(), '.codex')
+}
+
+/**
  * Resolve default Codex auth file path.
  */
 export function getDefaultCodexAuthPath(): string {
-  const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), '.codex')
-  const localPath = path.join(codexHome, 'auth.json')
+  const localPath = path.join(getDefaultCodexHomePath(), 'auth.json')
   if (!shouldUseWslAuthPath()) return localPath
 
   const wslPath = resolveWslDefaultCodexAuthPath()
