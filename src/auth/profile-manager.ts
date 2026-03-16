@@ -75,9 +75,30 @@ export class ProfileManager {
 
     const pe = this.normalizeEmail(profile.email)
     const ae = this.normalizeEmail(authData.email)
-    if (!pe || !ae) return false
-    if (pe === 'unknown' || ae === 'unknown') return false
-    return pe === ae
+    const hasComparableEmail =
+      Boolean(pe) &&
+      Boolean(ae) &&
+      pe !== 'unknown' &&
+      ae !== 'unknown'
+    const hasComparableAccountId =
+      Boolean(authData.accountId) && Boolean(profile.accountId)
+
+    // When both identifiers are present, require both to match.
+    // Team accounts can share accountId across different users, and the same
+    // email can legitimately have multiple plans/accounts.
+    if (hasComparableEmail && hasComparableAccountId) {
+      return pe === ae && authData.accountId === profile.accountId
+    }
+
+    if (hasComparableEmail) {
+      return pe === ae
+    }
+
+    if (hasComparableAccountId) {
+      return authData.accountId === profile.accountId
+    }
+
+    return false
   }
 
   private getStorageDir(): string {
