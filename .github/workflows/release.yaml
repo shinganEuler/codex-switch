@@ -70,6 +70,12 @@ jobs:
         run: |
           npm run vscode:publish -- --packagePath codex-switch.vsix
 
+      - name: Publish to Open VSX Registry
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          npm run openvsx:publish -- codex-switch.vsix
+
       - name: Create GitHub release
         uses: ncipollo/release-action@v1
         with:

@@ -23,6 +23,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "vscode:publish": "vsce publish",
+    "openvsx:publish": "npx ovsx publish",
     "compile": "tsc -p ./",
     "lint:ts": "eslint \"src/**/*.ts\" --max-warnings=0",
     "lint:md": "markdownlint-cli2",
