@@ -13,12 +13,23 @@ and this project adheres to [Semantic Versioning][].
 ### Removed
 -->
 
-## Unreleased
+## [1.3.2][] - 2026-04-14
+
+### Added
+
+* `customRemoteFiles` storage mode with a machine-scoped
+  `codexSwitch.remoteFilesRoot` setting for synced directories such as Dropbox.
+* Token freshness checks before switching profiles, using `last_refresh`
+  to write back newer runtime auth data to stored profiles.
 
 ### Changed
 
 * Rebranded the project as Codex Profile Switcher for the
   `shinganEuler/codex-switch` fork.
+* Switched packaging and publishing scripts from the deprecated `vsce`
+  package to `@vscode/vsce`.
+* Removed `.vscodeignore` so packaging relies only on `package.json.files`,
+  which matches current `vsce` requirements.
 
 ## [1.3.1][] - 2026-04-05
 
@@ -26,6 +37,7 @@ and this project adheres to [Semantic Versioning][].
 
 * Automatic publishing to <https://open-vsx.org/> in the release workflow.
 
+[1.3.2]: https://github.com/shinganEuler/codex-switch/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/shinganEuler/codex-switch/compare/v1.3.0...v1.3.1
 
 ## [1.3.0][] - 2026-03-16
