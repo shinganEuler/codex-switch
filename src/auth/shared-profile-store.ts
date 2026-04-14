@@ -12,29 +12,46 @@ export interface SharedActiveProfile {
   updatedAt: string
 }
 
-export function getSharedStoreRoot(): string {
-  return path.join(os.homedir(), SHARED_STORE_DIRNAME)
+function expandHomePath(value: string): string {
+  if (value === '~') {
+    return os.homedir()
+  }
+  if (value.startsWith('~/') || value.startsWith('~\\')) {
+    return path.join(os.homedir(), value.slice(2))
+  }
+  return value
 }
 
-export function getSharedProfilesDir(): string {
-  return path.join(getSharedStoreRoot(), SHARED_PROFILES_DIRNAME)
+export function getSharedStoreRoot(storeRoot?: string): string {
+  const raw = String(storeRoot || '').trim()
+  if (!raw) {
+    return path.join(os.homedir(), SHARED_STORE_DIRNAME)
+  }
+  return path.resolve(expandHomePath(raw))
 }
 
-export function getSharedProfilesPath(): string {
-  return path.join(getSharedStoreRoot(), SHARED_PROFILES_FILENAME)
+export function getSharedProfilesDir(storeRoot?: string): string {
+  return path.join(getSharedStoreRoot(storeRoot), SHARED_PROFILES_DIRNAME)
 }
 
-export function getSharedActiveProfilePath(): string {
-  return path.join(getSharedStoreRoot(), SHARED_ACTIVE_PROFILE_FILENAME)
+export function getSharedProfilesPath(storeRoot?: string): string {
+  return path.join(getSharedStoreRoot(storeRoot), SHARED_PROFILES_FILENAME)
 }
 
-export function getSharedProfileSecretsPath(profileId: string): string {
-  return path.join(getSharedProfilesDir(), `${profileId}.json`)
+export function getSharedActiveProfilePath(storeRoot?: string): string {
+  return path.join(getSharedStoreRoot(storeRoot), SHARED_ACTIVE_PROFILE_FILENAME)
 }
 
-export function ensureSharedStoreDirs(): void {
-  fs.mkdirSync(getSharedStoreRoot(), { recursive: true, mode: 0o700 })
-  fs.mkdirSync(getSharedProfilesDir(), { recursive: true, mode: 0o700 })
+export function getSharedProfileSecretsPath(
+  profileId: string,
+  storeRoot?: string,
+): string {
+  return path.join(getSharedProfilesDir(storeRoot), `${profileId}.json`)
+}
+
+export function ensureSharedStoreDirs(storeRoot?: string): void {
+  fs.mkdirSync(getSharedStoreRoot(storeRoot), { recursive: true, mode: 0o700 })
+  fs.mkdirSync(getSharedProfilesDir(storeRoot), { recursive: true, mode: 0o700 })
 }
 
 export function readJsonFile<T>(filePath: string): T | null {

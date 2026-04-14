@@ -89,10 +89,23 @@ export class ProfileManager {
   private getConfiguredStorageMode(): StorageMode {
     const cfg = vscode.workspace.getConfiguration('codexSwitch')
     const raw = cfg.get<StorageMode>('storageMode', 'auto')
-    if (raw === 'secretStorage' || raw === 'remoteFiles' || raw === 'auto') {
+    if (
+      raw === 'secretStorage' ||
+      raw === 'remoteFiles' ||
+      raw === 'customRemoteFiles' ||
+      raw === 'auto'
+    ) {
       return raw
     }
     return 'auto'
+  }
+
+  private getConfiguredRemoteFilesRoot(): string | undefined {
+    const raw = vscode.workspace
+      .getConfiguration('codexSwitch')
+      .get<string>('remoteFilesRoot', '')
+    const value = String(raw || '').trim()
+    return value ? value : undefined
   }
 
   private getResolvedStorageMode(): Exclude<StorageMode, 'auto'> {
@@ -106,7 +119,17 @@ export class ProfileManager {
   }
 
   private isRemoteFilesMode(): boolean {
-    return this.getResolvedStorageMode() === 'remoteFiles'
+    const mode = this.getResolvedStorageMode()
+    return mode === 'remoteFiles' || mode === 'customRemoteFiles'
+  }
+
+  private getSharedStoreRootPath(): string {
+    const mode = this.getResolvedStorageMode()
+    const configuredRoot =
+      mode === 'customRemoteFiles'
+        ? this.getConfiguredRemoteFilesRoot()
+        : undefined
+    return getSharedStoreRoot(configuredRoot)
   }
 
   private normalizeEmail(email: string | undefined): string {
@@ -214,21 +237,21 @@ export class ProfileManager {
 
   private getStorageDir(): string {
     if (this.isRemoteFilesMode()) {
-      return getSharedStoreRoot()
+      return this.getSharedStoreRootPath()
     }
     return this.context.globalStorageUri.fsPath
   }
 
   private getProfilesPath(): string {
     if (this.isRemoteFilesMode()) {
-      return getSharedProfilesPath()
+      return getSharedProfilesPath(this.getSharedStoreRootPath())
     }
     return path.join(this.getStorageDir(), PROFILES_FILENAME)
   }
 
   private ensureStorageDir() {
     if (this.isRemoteFilesMode()) {
-      ensureSharedStoreDirs()
+      ensureSharedStoreDirs(this.getSharedStoreRootPath())
       return
     }
 
@@ -310,14 +333,16 @@ export class ProfileManager {
     if (!this.isRemoteFilesMode()) {
       return null
     }
-    return readJsonFile<SharedActiveProfile>(getSharedActiveProfilePath())
+    return readJsonFile<SharedActiveProfile>(
+      getSharedActiveProfilePath(this.getSharedStoreRootPath()),
+    )
   }
 
   private writeSharedActiveProfile(profileId: string): void {
     if (!this.isRemoteFilesMode()) {
       return
     }
-    writeJsonFile(getSharedActiveProfilePath(), {
+    writeJsonFile(getSharedActiveProfilePath(this.getSharedStoreRootPath()), {
       profileId,
       updatedAt: new Date().toISOString(),
     } satisfies SharedActiveProfile)
@@ -327,11 +352,13 @@ export class ProfileManager {
     if (!this.isRemoteFilesMode()) {
       return
     }
-    deleteFileIfExists(getSharedActiveProfilePath())
+    deleteFileIfExists(getSharedActiveProfilePath(this.getSharedStoreRootPath()))
   }
 
   private readRemoteProfileTokens(profileId: string): ProfileTokens | null {
-    return readJsonFile<ProfileTokens>(getSharedProfileSecretsPath(profileId))
+    return readJsonFile<ProfileTokens>(
+      getSharedProfileSecretsPath(profileId, this.getSharedStoreRootPath()),
+    )
   }
 
   private async readStoredTokens(
@@ -360,8 +387,9 @@ export class ProfileManager {
     tokens: ProfileTokens,
   ): Promise<void> {
     if (this.isRemoteFilesMode()) {
-      ensureSharedStoreDirs()
-      writeJsonFile(getSharedProfileSecretsPath(profileId), tokens)
+      const storeRoot = this.getSharedStoreRootPath()
+      ensureSharedStoreDirs(storeRoot)
+      writeJsonFile(getSharedProfileSecretsPath(profileId, storeRoot), tokens)
       return
     }
 
@@ -373,7 +401,9 @@ export class ProfileManager {
 
   private async deleteStoredTokens(profileId: string): Promise<void> {
     if (this.isRemoteFilesMode()) {
-      deleteFileIfExists(getSharedProfileSecretsPath(profileId))
+      deleteFileIfExists(
+        getSharedProfileSecretsPath(profileId, this.getSharedStoreRootPath()),
+      )
       return
     }
 
@@ -658,6 +688,114 @@ export class ProfileManager {
     return file.profiles.find((p) => this.matchesAuth(p, authData))
   }
 
+  private authJsonEquals(
+    left: Record<string, unknown> | undefined,
+    right: Record<string, unknown> | undefined,
+  ): boolean {
+    return JSON.stringify(left ?? null) === JSON.stringify(right ?? null)
+  }
+
+  private getLastRefreshMs(
+    authJson: Record<string, unknown> | undefined,
+  ): number | undefined {
+    const value = authJson?.last_refresh
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value
+    }
+
+    if (typeof value !== 'string') {
+      return undefined
+    }
+
+    const raw = value.trim()
+    if (!raw) {
+      return undefined
+    }
+
+    const numeric = Number(raw)
+    if (Number.isFinite(numeric)) {
+      return numeric
+    }
+
+    const parsed = Date.parse(raw)
+    return Number.isNaN(parsed) ? undefined : parsed
+  }
+
+  private hasSameStoredTokens(
+    tokens: ProfileTokens | null,
+    authData: AuthData,
+  ): boolean {
+    if (!tokens) {
+      return false
+    }
+
+    return (
+      tokens.idToken === authData.idToken &&
+      tokens.accessToken === authData.accessToken &&
+      tokens.refreshToken === authData.refreshToken &&
+      (tokens.accountId || '') === (authData.accountId || '') &&
+      this.authJsonEquals(tokens.authJson, authData.authJson)
+    )
+  }
+
+  private shouldPersistCurrentAuth(
+    storedTokens: ProfileTokens | null,
+    authData: AuthData,
+  ): boolean {
+    if (!storedTokens) {
+      return true
+    }
+
+    if (this.hasSameStoredTokens(storedTokens, authData)) {
+      return false
+    }
+
+    const storedLastRefresh = this.getLastRefreshMs(storedTokens.authJson)
+    const currentLastRefresh = this.getLastRefreshMs(authData.authJson)
+
+    if (storedLastRefresh != null && currentLastRefresh != null) {
+      return currentLastRefresh >= storedLastRefresh
+    }
+
+    if (currentLastRefresh != null) {
+      return true
+    }
+
+    if (storedLastRefresh != null) {
+      return false
+    }
+
+    // If freshness is unavailable on both sides, keep the stored copy to avoid
+    // clobbering a possibly newer profile snapshot with an older runtime file.
+    return false
+  }
+
+  private async maybePersistCurrentAuthForProfile(
+    profileId: string | undefined,
+  ): Promise<void> {
+    if (!profileId) {
+      return
+    }
+
+    const profile = await this.getProfile(profileId)
+    if (!profile) {
+      return
+    }
+
+    const authData = await loadAuthDataFromFile(getDefaultCodexAuthPath())
+    if (!authData || !this.matchesAuth(profile, authData)) {
+      return
+    }
+
+    const storedTokens = await this.readStoredTokens(profileId)
+    if (!this.shouldPersistCurrentAuth(storedTokens, authData)) {
+      return
+    }
+
+    await this.replaceProfileAuth(profileId, authData)
+  }
+
   private async recoverMissingTokens(
     profileId: string,
   ): Promise<AuthData | null> {
@@ -932,6 +1070,8 @@ export class ProfileManager {
       : bucket.get<string>(ACTIVE_PROFILE_KEY) ||
         bucket.get<string>(OLD_ACTIVE_PROFILE_KEY)
 
+    await this.maybePersistCurrentAuthForProfile(prev)
+
     let authData: AuthData | null = null
     if (profileId) {
       authData = await this.loadAuthData(profileId)
@@ -1012,6 +1152,7 @@ export class ProfileManager {
     if (!active) {
       return
     }
+    await this.maybePersistCurrentAuthForProfile(active)
     await this.maybeSyncToCodexAuthFile(active)
   }
 
@@ -1037,7 +1178,7 @@ export class ProfileManager {
     if (this.isRemoteFilesMode()) {
       const profilesWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(
-          vscode.Uri.file(getSharedStoreRoot()),
+          vscode.Uri.file(this.getSharedStoreRootPath()),
           PROFILES_FILENAME,
         ),
       )
@@ -1048,7 +1189,7 @@ export class ProfileManager {
 
       const activeWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(
-          vscode.Uri.file(getSharedStoreRoot()),
+          vscode.Uri.file(this.getSharedStoreRootPath()),
           SHARED_ACTIVE_PROFILE_FILENAME,
         ),
       )
@@ -1059,7 +1200,7 @@ export class ProfileManager {
 
       const tokenWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(
-          vscode.Uri.file(getSharedProfilesDir()),
+          vscode.Uri.file(getSharedProfilesDir(this.getSharedStoreRootPath())),
           '*.json',
         ),
       )

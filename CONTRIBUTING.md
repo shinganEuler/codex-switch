@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to Codex Switch.
+Thanks for contributing to Codex Profile Switcher.
 
 ## Local Setup
 

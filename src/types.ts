@@ -13,7 +13,11 @@ export interface AuthData {
   authJson?: Record<string, unknown>
 }
 
-export type StorageMode = 'auto' | 'secretStorage' | 'remoteFiles'
+export type StorageMode =
+  | 'auto'
+  | 'secretStorage'
+  | 'remoteFiles'
+  | 'customRemoteFiles'
 
 export interface ProfileSummary {
   id: string

@@ -11,7 +11,7 @@ import { debugLog, errorLog } from './utils/log'
 let profileManager: ProfileManager | undefined
 
 export function activate(context: vscode.ExtensionContext) {
-  debugLog('Codex Switch activated')
+  debugLog('Codex Profile Switcher activated')
 
   const statusBarItem = createStatusBarItem()
   context.subscriptions.push(statusBarItem)
@@ -28,9 +28,34 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   registerCommands(context, profileManager, refreshUi)
+
+  let profileWatchers: vscode.Disposable | undefined
+  const resetProfileWatchers = () => {
+    profileWatchers?.dispose()
+    profileWatchers = vscode.Disposable.from(
+      ...profileManager!.createWatchers(() => {
+        void refreshUi()
+      }),
+    )
+  }
+
+  resetProfileWatchers()
+  context.subscriptions.push({
+    dispose: () => {
+      profileWatchers?.dispose()
+    },
+  })
   context.subscriptions.push(
-    ...profileManager.createWatchers(() => {
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (
+        !event.affectsConfiguration('codexSwitch.storageMode') &&
+        !event.affectsConfiguration('codexSwitch.remoteFilesRoot')
+      ) {
+        return
+      }
+      resetProfileWatchers()
       void refreshUi()
+      void profileManager?.syncActiveProfileToCodexAuthFile()
     }),
   )
   void refreshUi()

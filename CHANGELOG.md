@@ -13,13 +13,20 @@ and this project adheres to [Semantic Versioning][].
 ### Removed
 -->
 
+## Unreleased
+
+### Changed
+
+* Rebranded the project as Codex Profile Switcher for the
+  `shinganEuler/codex-switch` fork.
+
 ## [1.3.1][] - 2026-04-05
 
 ### Added
 
 * Automatic publishing to <https://open-vsx.org/> in the release workflow.
 
-[1.3.1]: https://github.com/WoozyMasta/codex-switch/compare/v1.3.0...v1.3.1
+[1.3.1]: https://github.com/shinganEuler/codex-switch/compare/v1.3.0...v1.3.1
 
 ## [1.3.0][] - 2026-03-16
 
@@ -31,7 +38,8 @@ and this project adheres to [Semantic Versioning][].
   (PR #9 by @iqdoctor)
 * Direct profile activation from tooltip.
   (PR #8 by @iqdoctor)
-* Added `Codex Switch: Export Profiles` and `Codex Switch: Import Profiles`
+* Added `Codex Profile Switcher: Export Profiles` and
+  `Codex Profile Switcher: Import Profiles`
   for full profile backup/restore, including credentials and active/previous
   profile selection.
 
@@ -60,7 +68,7 @@ and this project adheres to [Semantic Versioning][].
 * Removed `auth.json.bak.*` backup creation during sync.
   (PR #7 by @iqdoctor)
 
-[1.3.0]: https://github.com/WoozyMasta/codex-switch/compare/v1.2.0...v1.3.0
+[1.3.0]: https://github.com/shinganEuler/codex-switch/compare/v1.2.0...v1.3.0
 
 ## [1.2.0][] - 2026-02-15
 
@@ -68,7 +76,7 @@ and this project adheres to [Semantic Versioning][].
 
 * First public release
 
-[1.2.0]: https://github.com/WoozyMasta/codex-switch/tree/v1.2.0
+[1.2.0]: https://github.com/shinganEuler/codex-switch/tree/v1.2.0
 
 <!--links-->
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/

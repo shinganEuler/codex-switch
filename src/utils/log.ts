@@ -15,14 +15,14 @@ export function isDebugLoggingEnabled(): boolean {
 export function debugLog(...args: unknown[]) {
   if (isDebugLoggingEnabled()) {
     // Never log secrets; keep debug logs high-level.
-    console.log('[codex-switch]', ...args)
+    console.log('[codex-profile-switcher]', ...args)
   }
 }
 
 export function warnLog(...args: unknown[]) {
-  console.warn('[codex-switch]', ...args)
+  console.warn('[codex-profile-switcher]', ...args)
 }
 
 export function errorLog(...args: unknown[]) {
-  console.error('[codex-switch]', ...args)
+  console.error('[codex-profile-switcher]', ...args)
 }

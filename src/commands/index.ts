@@ -42,7 +42,9 @@ export function registerCommands(
   const getDefaultSettingsExportUri = (): vscode.Uri => {
     const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
     const baseDir = workspacePath || os.homedir()
-    return vscode.Uri.file(path.join(baseDir, 'codex-switch-profiles.json'))
+    return vscode.Uri.file(
+      path.join(baseDir, 'codex-profile-switcher-profiles.json'),
+    )
   }
 
   // Login command
