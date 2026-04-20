@@ -21,7 +21,7 @@ export function registerCommands(
 
   const maybeReloadWindowAfterProfileSwitch = async () => {
     const reloadAfterSwitch = vscode.workspace
-      .getConfiguration('codexSwitch')
+      .getConfiguration('codexIdentityRouter')
       .get<boolean>('reloadWindowAfterProfileSwitch', false)
     if (!reloadAfterSwitch) {
       return
@@ -34,7 +34,7 @@ export function registerCommands(
 
   const getStatusBarClickBehavior = (): StatusBarClickBehavior => {
     const raw = vscode.workspace
-      .getConfiguration('codexSwitch')
+      .getConfiguration('codexIdentityRouter')
       .get<StatusBarClickBehavior>('statusBarClickBehavior', 'cycle')
     return raw === 'toggleLast' ? 'toggleLast' : 'cycle'
   }
@@ -43,13 +43,13 @@ export function registerCommands(
     const workspacePath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
     const baseDir = workspacePath || os.homedir()
     return vscode.Uri.file(
-      path.join(baseDir, 'codex-profile-switcher-profiles.json'),
+      path.join(baseDir, 'codex-identity-router-profiles.json'),
     )
   }
 
   // Login command
   const loginCommand = vscode.commands.registerCommand(
-    'codex-switch.login',
+    'codex-identity-router.login',
     async () => {
       const loginCommandText = getLoginCommandText()
       const loginSequence = `${loginCommandText}\n`
@@ -68,7 +68,9 @@ export function registerCommands(
       )
 
       if (selection === manageLabel) {
-        await vscode.commands.executeCommand('codex-switch.profile.manage')
+        await vscode.commands.executeCommand(
+          'codex-identity-router.profile.manage',
+        )
       } else if (selection === openTerminalLabel) {
         vscode.commands.executeCommand('workbench.action.terminal.new')
         setTimeout(() => {
@@ -89,11 +91,13 @@ export function registerCommands(
   )
 
   const switchProfileCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.switch',
+    'codex-identity-router.profile.switch',
     async () => {
       const profiles = await profileManager.listProfiles()
       if (profiles.length === 0) {
-        await vscode.commands.executeCommand('codex-switch.profile.manage')
+        await vscode.commands.executeCommand(
+          'codex-identity-router.profile.manage',
+        )
         return
       }
 
@@ -121,10 +125,12 @@ export function registerCommands(
   )
 
   const activateProfileCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.activate',
+    'codex-identity-router.profile.activate',
     async (profileId?: string) => {
       if (!profileId) {
-        await vscode.commands.executeCommand('codex-switch.profile.switch')
+        await vscode.commands.executeCommand(
+          'codex-identity-router.profile.switch',
+        )
         return
       }
 
@@ -139,13 +145,15 @@ export function registerCommands(
   )
 
   const toggleLastProfileCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.toggleLast',
+    'codex-identity-router.profile.toggleLast',
     async () => {
       const behavior = getStatusBarClickBehavior()
       if (behavior === 'toggleLast') {
         const newId = await profileManager.toggleLastProfileId()
         if (!newId) {
-          await vscode.commands.executeCommand('codex-switch.profile.switch')
+          await vscode.commands.executeCommand(
+            'codex-identity-router.profile.switch',
+          )
           return
         }
         await onAuthChanged()
@@ -155,7 +163,9 @@ export function registerCommands(
 
       const profiles = await profileManager.listProfiles()
       if (profiles.length === 0) {
-        await vscode.commands.executeCommand('codex-switch.profile.manage')
+        await vscode.commands.executeCommand(
+          'codex-identity-router.profile.manage',
+        )
         return
       }
 
@@ -174,7 +184,7 @@ export function registerCommands(
   )
 
   const addFromCodexAuthFileCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.addFromCodexAuthFile',
+    'codex-identity-router.profile.addFromCodexAuthFile',
     async () => {
       const authPath = getDefaultCodexAuthPath()
       const loginCommandText = getLoginCommandText()
@@ -235,7 +245,7 @@ export function registerCommands(
   )
 
   const loginViaCliCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.login',
+    'codex-identity-router.profile.login',
     async () => {
       const authPath = getDefaultCodexAuthPath()
       const loginSequence = `${getLoginCommandText()}\n`
@@ -282,7 +292,7 @@ export function registerCommands(
         )
         if (pick === importLabel) {
           await vscode.commands.executeCommand(
-            'codex-switch.profile.addFromCodexAuthFile',
+            'codex-identity-router.profile.addFromCodexAuthFile',
           )
         }
       }
@@ -329,11 +339,13 @@ export function registerCommands(
       if (msg === importNowLabel) {
         cleanup()
         await vscode.commands.executeCommand(
-          'codex-switch.profile.addFromCodexAuthFile',
+          'codex-identity-router.profile.addFromCodexAuthFile',
         )
       } else if (msg === manageLabel) {
         cleanup()
-        await vscode.commands.executeCommand('codex-switch.profile.manage')
+        await vscode.commands.executeCommand(
+          'codex-identity-router.profile.manage',
+        )
       } else {
         // Let watcher run until it triggers or times out.
         setTimeout(() => cleanup(), maxWaitMs)
@@ -342,7 +354,7 @@ export function registerCommands(
   )
 
   const addFromFileCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.addFromFile',
+    'codex-identity-router.profile.addFromFile',
     async () => {
       const uri = await vscode.window.showOpenDialog({
         canSelectMany: false,
@@ -404,7 +416,7 @@ export function registerCommands(
   )
 
   const exportSettingsCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.exportSettings',
+    'codex-identity-router.profile.exportSettings',
     async () => {
       const saveUri = await vscode.window.showSaveDialog({
         saveLabel: vscode.l10n.t('Export profiles'),
@@ -430,7 +442,7 @@ export function registerCommands(
   )
 
   const importSettingsCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.importSettings',
+    'codex-identity-router.profile.importSettings',
     async () => {
       const uri = await vscode.window.showOpenDialog({
         canSelectMany: false,
@@ -476,7 +488,7 @@ export function registerCommands(
   )
 
   const renameProfileCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.rename',
+    'codex-identity-router.profile.rename',
     async () => {
       const profiles = await profileManager.listProfiles()
       if (profiles.length === 0) {
@@ -509,7 +521,7 @@ export function registerCommands(
   )
 
   const deleteProfileCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.delete',
+    'codex-identity-router.profile.delete',
     async () => {
       const profiles = await profileManager.listProfiles()
       if (profiles.length === 0) {
@@ -544,7 +556,7 @@ export function registerCommands(
   )
 
   const manageProfilesCommand = vscode.commands.registerCommand(
-    'codex-switch.profile.manage',
+    'codex-identity-router.profile.manage',
     async () => {
       const authPath = getDefaultCodexAuthPath()
       const profiles = await profileManager.listProfiles()
@@ -554,42 +566,42 @@ export function registerCommands(
         [
           {
             label: vscode.l10n.t('Login via Codex CLI...'),
-            command: 'codex-switch.profile.login',
+            command: 'codex-identity-router.profile.login',
           },
           ...(hasProfiles
             ? [
                 {
                   label: vscode.l10n.t('Switch profile'),
-                  command: 'codex-switch.profile.switch',
+                  command: 'codex-identity-router.profile.switch',
                 },
               ]
             : []),
           {
             label: vscode.l10n.t('Add from current auth.json'),
             description: authPath,
-            command: 'codex-switch.profile.addFromCodexAuthFile',
+            command: 'codex-identity-router.profile.addFromCodexAuthFile',
           },
           {
             label: vscode.l10n.t('Import from file...'),
-            command: 'codex-switch.profile.addFromFile',
+            command: 'codex-identity-router.profile.addFromFile',
           },
           {
             label: vscode.l10n.t('Export profiles...'),
-            command: 'codex-switch.profile.exportSettings',
+            command: 'codex-identity-router.profile.exportSettings',
           },
           {
             label: vscode.l10n.t('Import profiles...'),
-            command: 'codex-switch.profile.importSettings',
+            command: 'codex-identity-router.profile.importSettings',
           },
           ...(hasProfiles
             ? [
                 {
                   label: vscode.l10n.t('Rename profile'),
-                  command: 'codex-switch.profile.rename',
+                  command: 'codex-identity-router.profile.rename',
                 },
                 {
                   label: vscode.l10n.t('Delete profile'),
-                  command: 'codex-switch.profile.delete',
+                  command: 'codex-identity-router.profile.delete',
                 },
               ]
             : []),

@@ -1,5 +1,5 @@
 {
-  "name": "codex-profile-switcher",
+  "name": "codex-identity-router",
   "author": "shinganEuler",
   "repository": {
     "type": "git",
@@ -7,7 +7,7 @@
   },
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "1.3.4",
+  "version": "1.3.6",
   "license": "MIT",
   "publisher": "shinganeuler",
   "files": [
@@ -49,55 +49,55 @@
   "contributes": {
     "commands": [
       {
-        "command": "codex-switch.login",
+        "command": "codex-identity-router.login",
         "title": "%command.login.title%"
       },
       {
-        "command": "codex-switch.profile.manage",
+        "command": "codex-identity-router.profile.manage",
         "title": "%command.profile.manage.title%"
       },
       {
-        "command": "codex-switch.profile.login",
+        "command": "codex-identity-router.profile.login",
         "title": "%command.profile.login.title%"
       },
       {
-        "command": "codex-switch.profile.switch",
+        "command": "codex-identity-router.profile.switch",
         "title": "%command.profile.switch.title%"
       },
       {
-        "command": "codex-switch.profile.toggleLast",
+        "command": "codex-identity-router.profile.toggleLast",
         "title": "%command.profile.toggleLast.title%"
       },
       {
-        "command": "codex-switch.profile.addFromCodexAuthFile",
+        "command": "codex-identity-router.profile.addFromCodexAuthFile",
         "title": "%command.profile.addFromCodexAuthFile.title%"
       },
       {
-        "command": "codex-switch.profile.addFromFile",
+        "command": "codex-identity-router.profile.addFromFile",
         "title": "%command.profile.addFromFile.title%"
       },
       {
-        "command": "codex-switch.profile.exportSettings",
+        "command": "codex-identity-router.profile.exportSettings",
         "title": "%command.profile.exportSettings.title%"
       },
       {
-        "command": "codex-switch.profile.importSettings",
+        "command": "codex-identity-router.profile.importSettings",
         "title": "%command.profile.importSettings.title%"
       },
       {
-        "command": "codex-switch.profile.rename",
+        "command": "codex-identity-router.profile.rename",
         "title": "%command.profile.rename.title%"
       },
       {
-        "command": "codex-switch.profile.delete",
+        "command": "codex-identity-router.profile.delete",
         "title": "%command.profile.delete.title%"
       }
     ],
     "menus": {
       "statusBar/item/context": [
         {
-          "command": "codex-switch.profile.manage",
-          "when": "statusBarItemId == codex-switch.profile",
+          "command": "codex-identity-router.profile.manage",
+          "when": "statusBarItemId == codex-identity-router.profile",
           "group": "navigation"
         }
       ]
@@ -105,12 +105,12 @@
     "configuration": {
       "title": "%configuration.title%",
       "properties": {
-        "codexSwitch.debugLogging": {
+        "codexIdentityRouter.debugLogging": {
           "type": "boolean",
           "default": false,
           "description": "%configuration.debugLogging.description%"
         },
-        "codexSwitch.activeProfileScope": {
+        "codexIdentityRouter.activeProfileScope": {
           "type": "string",
           "enum": [
             "global",
@@ -119,7 +119,7 @@
           "default": "global",
           "description": "%configuration.activeProfileScope.description%"
         },
-        "codexSwitch.storageMode": {
+        "codexIdentityRouter.storageMode": {
           "type": "string",
           "enum": [
             "auto",
@@ -136,19 +136,19 @@
             "%configuration.storageMode.customRemoteFiles%"
           ]
         },
-        "codexSwitch.remoteFilesRoot": {
+        "codexIdentityRouter.remoteFilesRoot": {
           "type": "string",
           "default": "",
           "scope": "machine",
           "description": "%configuration.remoteFilesRoot.description%",
-          "when": "config.codexSwitch.storageMode == customRemoteFiles"
+          "when": "config.codexIdentityRouter.storageMode == customRemoteFiles"
         },
-        "codexSwitch.reloadWindowAfterProfileSwitch": {
+        "codexIdentityRouter.reloadWindowAfterProfileSwitch": {
           "type": "boolean",
           "default": false,
           "description": "%configuration.reloadWindowAfterProfileSwitch.description%"
         },
-        "codexSwitch.statusBarClickBehavior": {
+        "codexIdentityRouter.statusBarClickBehavior": {
           "type": "string",
           "enum": [
             "cycle",

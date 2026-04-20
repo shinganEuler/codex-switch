@@ -49,13 +49,13 @@ credentials used by another environment.
 
 ## Storage Modes
 
-`codexSwitch.storageMode` controls where credentials and profile state live:
+`codexIdentityRouter.storageMode` controls where credentials and profile state live:
 
 * `secretStorage`: credentials stay in VS Code SecretStorage and metadata
   stays in VS Code global storage.
 * `remoteFiles`: credentials and shared state are stored in `~/.codex-switch`.
 * `customRemoteFiles`: credentials and shared state are stored in the
-  directory configured by `codexSwitch.remoteFilesRoot`.
+  directory configured by `codexIdentityRouter.remoteFilesRoot`.
 * `auto`: SSH remotes use `remoteFiles`; local sessions use `secretStorage`.
 
 File-based stores use the following layout:
@@ -86,13 +86,13 @@ extension offers recovery choices instead of silently discarding the profile:
 
 ## Main Settings
 
-* `codexSwitch.debugLogging`
-* `codexSwitch.activeProfileScope` (`global` or `workspace`)
-* `codexSwitch.storageMode` (`auto`, `secretStorage`, `remoteFiles`,
+* `codexIdentityRouter.debugLogging`
+* `codexIdentityRouter.activeProfileScope` (`global` or `workspace`)
+* `codexIdentityRouter.storageMode` (`auto`, `secretStorage`, `remoteFiles`,
   `customRemoteFiles`)
-* `codexSwitch.remoteFilesRoot`
-* `codexSwitch.reloadWindowAfterProfileSwitch`
-* `codexSwitch.statusBarClickBehavior` (`cycle` or `toggleLast`)
+* `codexIdentityRouter.remoteFilesRoot`
+* `codexIdentityRouter.reloadWindowAfterProfileSwitch`
+* `codexIdentityRouter.statusBarClickBehavior` (`cycle` or `toggleLast`)
 
 ## Security Notes
 

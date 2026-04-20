@@ -7,7 +7,7 @@ let cachedProfiles: ProfileSummary[] = []
 
 export function createStatusBarItem(): vscode.StatusBarItem {
   statusBarItem = vscode.window.createStatusBarItem(
-    'codex-switch.profile',
+    'codex-identity-router.profile',
     vscode.StatusBarAlignment.Right,
     100,
   )
@@ -29,7 +29,7 @@ export function updateProfileStatus(
 
   if (!profile) {
     statusBarItem.text = `$(account) ${vscode.l10n.t('Codex: {0}', vscode.l10n.t('none'))}`
-    statusBarItem.command = 'codex-switch.profile.manage'
+    statusBarItem.command = 'codex-identity-router.profile.manage'
     statusBarItem.tooltip = createProfileTooltip(null, cachedProfiles)
     return
   }
@@ -38,8 +38,8 @@ export function updateProfileStatus(
   // If there is nothing meaningful to switch to, go straight to Manage.
   statusBarItem.command =
     cachedProfiles.length <= 1
-      ? 'codex-switch.profile.manage'
-      : 'codex-switch.profile.toggleLast'
+      ? 'codex-identity-router.profile.manage'
+      : 'codex-identity-router.profile.toggleLast'
   statusBarItem.tooltip = createProfileTooltip(profile, cachedProfiles)
 }
 

@@ -32,15 +32,9 @@ interface ProfilesFileV1 {
 }
 
 const PROFILES_FILENAME = 'profiles.json'
-const ACTIVE_PROFILE_KEY = 'codexSwitch.activeProfileId'
-const LAST_PROFILE_KEY = 'codexSwitch.lastProfileId'
-const MIGRATED_LEGACY_KEY = 'codexSwitch.migratedLegacyProfiles'
-
-// Backward compatibility keys (pre-rename).
-const OLD_ACTIVE_PROFILE_KEY = 'codexUsage.activeProfileId'
-const OLD_LAST_PROFILE_KEY = 'codexUsage.lastProfileId'
-const OLD_SECRET_PREFIX = 'codexUsage.profile.'
-const NEW_SECRET_PREFIX = 'codexSwitch.profile.'
+const ACTIVE_PROFILE_KEY = 'codexIdentityRouter.activeProfileId'
+const LAST_PROFILE_KEY = 'codexIdentityRouter.lastProfileId'
+const SECRET_PREFIX = 'codexIdentityRouter.profile.'
 
 interface ExportedProfileEntryV1 {
   profile: ProfileSummary
@@ -48,7 +42,7 @@ interface ExportedProfileEntryV1 {
 }
 
 interface ExportedSettingsV1 {
-  format: 'codex-switch-profile-export'
+  format: 'codex-identity-router-profile-export'
   version: 1
   exportedAt: string
   activeProfileId?: string
@@ -89,7 +83,7 @@ export class ProfileManager {
   private lastSyncedProfileId: string | undefined
 
   private getConfiguredStorageMode(): StorageMode {
-    const cfg = vscode.workspace.getConfiguration('codexSwitch')
+    const cfg = vscode.workspace.getConfiguration('codexIdentityRouter')
     const raw = cfg.get<StorageMode>('storageMode', 'auto')
     if (
       raw === 'secretStorage' ||
@@ -104,7 +98,7 @@ export class ProfileManager {
 
   private getConfiguredRemoteFilesRoot(): string | undefined {
     const raw = vscode.workspace
-      .getConfiguration('codexSwitch')
+      .getConfiguration('codexIdentityRouter')
       .get<string>('remoteFilesRoot', '')
     const value = String(raw || '').trim()
     return value ? value : undefined
@@ -324,11 +318,7 @@ export class ProfileManager {
   }
 
   private secretKey(profileId: string): string {
-    return `${NEW_SECRET_PREFIX}${profileId}`
-  }
-
-  private legacySecretKey(profileId: string): string {
-    return `${OLD_SECRET_PREFIX}${profileId}`
+    return `${SECRET_PREFIX}${profileId}`
   }
 
   private readSharedActiveProfile(): SharedActiveProfile | null {
@@ -378,9 +368,7 @@ export class ProfileManager {
       return this.readRemoteProfileTokens(profileId)
     }
 
-    const raw =
-      (await this.context.secrets.get(this.secretKey(profileId))) ||
-      (await this.context.secrets.get(this.legacySecretKey(profileId)))
+    const raw = await this.context.secrets.get(this.secretKey(profileId))
     if (!raw) {
       return null
     }
@@ -418,101 +406,9 @@ export class ProfileManager {
     }
 
     await this.context.secrets.delete(this.secretKey(profileId))
-    await this.context.secrets.delete(this.legacySecretKey(profileId))
-  }
-
-  private getGlobalStorageRoot(): string {
-    // .../User/globalStorage/<publisher.name> -> .../User/globalStorage
-    return path.dirname(this.context.globalStorageUri.fsPath)
-  }
-
-  private async tryMigrateLegacyProfilesOnce(): Promise<void> {
-    if (this.context.globalState.get<boolean>(MIGRATED_LEGACY_KEY)) {
-      return
-    }
-
-    const current = await this.readProfilesFile()
-    if (current.profiles.length > 0) {
-      await this.context.globalState.update(MIGRATED_LEGACY_KEY, true)
-      return
-    }
-
-    const root = this.getGlobalStorageRoot()
-    if (!fs.existsSync(root)) {
-      await this.context.globalState.update(MIGRATED_LEGACY_KEY, true)
-      return
-    }
-
-    const currentDirName = path.basename(this.getStorageDir())
-    const candidates: string[] = []
-
-    try {
-      const entries = fs.readdirSync(root, { withFileTypes: true })
-      for (const e of entries) {
-        if (!e.isDirectory()) {
-          continue
-        }
-        const name = e.name
-        if (name === currentDirName) {
-          continue
-        }
-        if (!name.endsWith('.codex-switch') && !name.endsWith('.codex-stats')) {
-          continue
-        }
-        candidates.push(name)
-      }
-    } catch {
-      await this.context.globalState.update(MIGRATED_LEGACY_KEY, true)
-      return
-    }
-
-    // Prefer older ids we used during development.
-    candidates.sort((a, b) => {
-      const rank = (n: string) => {
-        if (n.toLowerCase().includes('codex-switch')) {
-          return 0
-        }
-        if (n.toLowerCase().includes('codex-stats')) {
-          return 1
-        }
-        return 2
-      }
-      return rank(a) - rank(b)
-    })
-
-    for (const dirName of candidates) {
-      const legacyProfilesPath = path.join(root, dirName, PROFILES_FILENAME)
-      if (!fs.existsSync(legacyProfilesPath)) {
-        continue
-      }
-
-      try {
-        const raw = fs.readFileSync(legacyProfilesPath, 'utf8')
-        const legacy = this.parseProfilesFile(raw)
-        if (!legacy.profiles || legacy.profiles.length === 0) {
-          continue
-        }
-
-        // Only migrate the profile list. Tokens are stored in SecretStorage and cannot be
-        // read across extension ids.
-        this.writeProfilesFile({ version: 1, profiles: legacy.profiles })
-
-        void vscode.window.showInformationMessage(
-          vscode.l10n.t(
-            'Found profiles from a previous install. Please re-import auth.json for each profile to restore tokens.',
-          ),
-        )
-        break
-      } catch {
-        // keep trying other candidates
-      }
-    }
-
-    await this.context.globalState.update(MIGRATED_LEGACY_KEY, true)
   }
 
   async listProfiles(): Promise<ProfileSummary[]> {
-    await this.tryMigrateLegacyProfilesOnce()
     const file = await this.readProfilesFile()
     return [...file.profiles].sort((a, b) => a.name.localeCompare(b.name))
   }
@@ -543,7 +439,7 @@ export class ProfileManager {
     }
 
     const data: ExportedSettingsV1 = {
-      format: 'codex-switch-profile-export',
+      format: 'codex-identity-router-profile-export',
       version: 1,
       exportedAt: new Date().toISOString(),
       activeProfileId,
@@ -615,7 +511,7 @@ export class ProfileManager {
     }
 
     const format = asOptionalString(payload.format)
-    if (format !== 'codex-switch-profile-export') {
+    if (format !== 'codex-identity-router-profile-export') {
       throw new Error('Unsupported settings file format.')
     }
 
@@ -1015,23 +911,8 @@ export class ProfileManager {
   }
 
   private getStateBucket(): vscode.Memento {
-    const newCfg = vscode.workspace.getConfiguration('codexSwitch')
-    const scopeFromNew = newCfg.get<'global' | 'workspace'>(
-      'activeProfileScope',
-    )
-    const scope =
-      scopeFromNew ||
-      vscode.workspace
-        .getConfiguration('codexUsage')
-        .get<'global' | 'workspace'>('activeProfileScope', 'global')
-    return scope === 'workspace'
-      ? this.context.workspaceState
-      : this.context.globalState
-  }
-
-  private getLegacyStateBucket(): vscode.Memento {
     const scope = vscode.workspace
-      .getConfiguration('codexUsage')
+      .getConfiguration('codexIdentityRouter')
       .get<'global' | 'workspace'>('activeProfileScope', 'global')
     return scope === 'workspace'
       ? this.context.workspaceState
@@ -1058,18 +939,6 @@ export class ProfileManager {
     if (v) {
       return v
     }
-
-    // Migrate old key lazily.
-    const legacyBucket = this.getLegacyStateBucket()
-    const old =
-      bucket.get<string>(OLD_ACTIVE_PROFILE_KEY) ||
-      legacyBucket.get<string>(OLD_ACTIVE_PROFILE_KEY)
-    if (old) {
-      await bucket.update(ACTIVE_PROFILE_KEY, old)
-      await bucket.update(OLD_ACTIVE_PROFILE_KEY, undefined)
-      await legacyBucket.update(OLD_ACTIVE_PROFILE_KEY, undefined)
-      return old
-    }
     return undefined
   }
 
@@ -1077,8 +946,7 @@ export class ProfileManager {
     const bucket = this.getStateBucket()
     const prev = this.isRemoteFilesMode()
       ? await this.getActiveProfileId()
-      : bucket.get<string>(ACTIVE_PROFILE_KEY) ||
-        bucket.get<string>(OLD_ACTIVE_PROFILE_KEY)
+      : bucket.get<string>(ACTIVE_PROFILE_KEY)
 
     await this.maybePersistCurrentAuthForProfile(prev)
 
@@ -1105,7 +973,6 @@ export class ProfileManager {
       }
     } else {
       await bucket.update(ACTIVE_PROFILE_KEY, profileId)
-      await bucket.update(OLD_ACTIVE_PROFILE_KEY, undefined)
     }
 
     if (profileId && authData) {
@@ -1122,24 +989,12 @@ export class ProfileManager {
     if (v) {
       return v
     }
-
-    const legacyBucket = this.getLegacyStateBucket()
-    const old =
-      bucket.get<string>(OLD_LAST_PROFILE_KEY) ||
-      legacyBucket.get<string>(OLD_LAST_PROFILE_KEY)
-    if (old) {
-      await bucket.update(LAST_PROFILE_KEY, old)
-      await bucket.update(OLD_LAST_PROFILE_KEY, undefined)
-      await legacyBucket.update(OLD_LAST_PROFILE_KEY, undefined)
-      return old
-    }
     return undefined
   }
 
   private async setLastProfileId(profileId: string | undefined): Promise<void> {
     const bucket = this.getStateBucket()
     await bucket.update(LAST_PROFILE_KEY, profileId)
-    await bucket.update(OLD_LAST_PROFILE_KEY, undefined)
   }
 
   async toggleLastProfileId(): Promise<string | undefined> {

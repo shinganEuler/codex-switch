@@ -13,6 +13,23 @@ and this project adheres to [Semantic Versioning][].
 ### Removed
 -->
 
+## [1.3.6][] - 2026-04-20
+
+### Changed
+
+* Renamed command IDs and configuration keys from `codexSwitch` /
+  `codex-switch` to `codexIdentityRouter` / `codex-identity-router`.
+* Switched active-profile state keys and secret prefixes to the new
+  `codexIdentityRouter` namespace.
+
+## [1.3.5][] - 2026-04-20
+
+### Changed
+
+* Renamed the published extension package ID to `codex-identity-router`.
+* Updated generated package artifacts, export filenames, and debug log prefixes
+  to match the new extension ID.
+
 ## [1.3.4][] - 2026-04-20
 
 ### Changed
@@ -36,8 +53,8 @@ and this project adheres to [Semantic Versioning][].
 
 ### Added
 
-* `customRemoteFiles` storage mode with a machine-scoped
-  `codexSwitch.remoteFilesRoot` setting for synced directories such as Dropbox.
+* `customRemoteFiles` storage mode with a machine-scoped custom remote root
+  setting for synced directories such as Dropbox.
 * Token freshness checks before switching profiles, using `last_refresh`
   to write back newer runtime auth data to stored profiles.
 
@@ -55,6 +72,8 @@ and this project adheres to [Semantic Versioning][].
 
 * Automatic publishing to <https://open-vsx.org/> in the release workflow.
 
+[1.3.6]: https://github.com/shinganEuler/codex-switch/compare/v1.3.5...v1.3.6
+[1.3.5]: https://github.com/shinganEuler/codex-switch/compare/v1.3.4...v1.3.5
 [1.3.3]: https://github.com/shinganEuler/codex-switch/compare/v1.3.2...v1.3.3
 [1.3.4]: https://github.com/shinganEuler/codex-switch/compare/v1.3.3...v1.3.4
 [1.3.2]: https://github.com/shinganEuler/codex-switch/compare/v1.3.1...v1.3.2
@@ -66,7 +85,7 @@ and this project adheres to [Semantic Versioning][].
 
 * Shared SSH profile storage for remote sessions.
   (PR #9 by @iqdoctor)
-* `codexSwitch.storageMode` with `auto`, `secretStorage`, `remoteFiles`.
+* Added storage mode selection with `auto`, `secretStorage`, `remoteFiles`.
   (PR #9 by @iqdoctor)
 * Direct profile activation from tooltip.
   (PR #8 by @iqdoctor)
@@ -82,8 +101,7 @@ and this project adheres to [Semantic Versioning][].
   (PR #10 by @panella87)
 * Duplicate detection is workspace-aware while preserving identity-first logic.
   (follow-up changes on `master`; aligns with PR #5 by @iqdoctor)
-* Status-bar click behavior is explicitly configurable via
-  `codexSwitch.statusBarClickBehavior`:
+* Status-bar click behavior is explicitly configurable:
   `cycle` (cycle all profiles) or `toggleLast` (switch current/previous).
 
 ### Fixed

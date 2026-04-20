@@ -19,8 +19,8 @@ export function createProfileTooltip(
   tooltip.supportHtml = true
   tooltip.isTrusted = {
     enabledCommands: [
-      'codex-switch.profile.manage',
-      'codex-switch.profile.activate',
+      'codex-identity-router.profile.manage',
+      'codex-identity-router.profile.activate',
     ],
   }
 
@@ -36,7 +36,10 @@ export function createProfileTooltip(
       const planDisplay =
         rawPlan === 'Unknown' ? vscode.l10n.t('Unknown') : rawPlan.toUpperCase()
       const plan = escapeMarkdown(planDisplay)
-      const switchUri = buildCommandUri('codex-switch.profile.activate', [p.id])
+      const switchUri = buildCommandUri(
+        'codex-identity-router.profile.activate',
+        [p.id],
+      )
       const emailDisplay =
         p.email && p.email !== 'Unknown' ? p.email : vscode.l10n.t('Unknown')
       const linkTitle = escapeLinkTitle(emailDisplay)
@@ -59,7 +62,7 @@ export function createProfileTooltip(
 
   tooltip.appendMarkdown('---\n\n')
   tooltip.appendMarkdown(
-    `[${vscode.l10n.t('Manage profiles')}](command:codex-switch.profile.manage)\n\n`,
+    `[${vscode.l10n.t('Manage profiles')}](command:codex-identity-router.profile.manage)\n\n`,
   )
   return tooltip
 }

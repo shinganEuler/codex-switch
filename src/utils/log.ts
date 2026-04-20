@@ -1,28 +1,22 @@
 import * as vscode from 'vscode'
 
 export function isDebugLoggingEnabled(): boolean {
-  const newCfg = vscode.workspace.getConfiguration('codexSwitch')
-  if (newCfg.has('debugLogging')) {
-    return !!newCfg.get<boolean>('debugLogging', false)
-  }
-
-  // Backward compatibility.
   return !!vscode.workspace
-    .getConfiguration('codexUsage')
+    .getConfiguration('codexIdentityRouter')
     .get<boolean>('debugLogging', false)
 }
 
 export function debugLog(...args: unknown[]) {
   if (isDebugLoggingEnabled()) {
     // Never log secrets; keep debug logs high-level.
-    console.log('[codex-profile-switcher]', ...args)
+    console.log('[codex-identity-router]', ...args)
   }
 }
 
 export function warnLog(...args: unknown[]) {
-  console.warn('[codex-profile-switcher]', ...args)
+  console.warn('[codex-identity-router]', ...args)
 }
 
 export function errorLog(...args: unknown[]) {
-  console.error('[codex-profile-switcher]', ...args)
+  console.error('[codex-identity-router]', ...args)
 }

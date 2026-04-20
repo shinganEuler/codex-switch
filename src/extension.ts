@@ -11,7 +11,7 @@ import { debugLog, errorLog } from './utils/log'
 let profileManager: ProfileManager | undefined
 
 export function activate(context: vscode.ExtensionContext) {
-  debugLog('Codex Profile Switcher activated')
+  debugLog('Codex Identity Router activated')
 
   const statusBarItem = createStatusBarItem()
   context.subscriptions.push(statusBarItem)
@@ -48,8 +48,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (
-        !event.affectsConfiguration('codexSwitch.storageMode') &&
-        !event.affectsConfiguration('codexSwitch.remoteFilesRoot')
+        !event.affectsConfiguration('codexIdentityRouter.storageMode') &&
+        !event.affectsConfiguration('codexIdentityRouter.remoteFilesRoot')
       ) {
         return
       }
