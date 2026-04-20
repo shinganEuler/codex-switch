@@ -5,11 +5,12 @@ import * as path from 'path'
 export const SHARED_STORE_DIRNAME = '.codex-switch'
 export const SHARED_PROFILES_DIRNAME = 'profiles'
 export const SHARED_PROFILES_FILENAME = 'profiles.json'
-export const SHARED_ACTIVE_PROFILE_FILENAME = 'active-profile.json'
+export const SHARED_LEGACY_ACTIVE_PROFILE_FILENAME = 'active-profile.json'
 
 export interface SharedActiveProfile {
   profileId: string
   updatedAt: string
+  machineName?: string
 }
 
 function expandHomePath(value: string): string {
@@ -38,8 +39,33 @@ export function getSharedProfilesPath(storeRoot?: string): string {
   return path.join(getSharedStoreRoot(storeRoot), SHARED_PROFILES_FILENAME)
 }
 
-export function getSharedActiveProfilePath(storeRoot?: string): string {
-  return path.join(getSharedStoreRoot(storeRoot), SHARED_ACTIVE_PROFILE_FILENAME)
+function sanitizeMachineName(value: string): string {
+  const normalized = String(value || '')
+    .trim()
+    .replace(/[^\w.-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return normalized || 'unknown-machine'
+}
+
+export function getSharedActiveProfileFilename(machineName?: string): string {
+  return `active-profile@${sanitizeMachineName(machineName || os.hostname())}.json`
+}
+
+export function getSharedActiveProfilePath(
+  storeRoot?: string,
+  machineName?: string,
+): string {
+  return path.join(
+    getSharedStoreRoot(storeRoot),
+    getSharedActiveProfileFilename(machineName),
+  )
+}
+
+export function getLegacySharedActiveProfilePath(storeRoot?: string): string {
+  return path.join(
+    getSharedStoreRoot(storeRoot),
+    SHARED_LEGACY_ACTIVE_PROFILE_FILENAME,
+  )
 }
 
 export function getSharedProfileSecretsPath(

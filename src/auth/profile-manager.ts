@@ -7,10 +7,12 @@ import { getDefaultCodexAuthPath, loadAuthDataFromFile } from './auth-manager'
 import { syncCodexAuthFile } from './codex-auth-sync'
 import {
   SharedActiveProfile,
-  SHARED_ACTIVE_PROFILE_FILENAME,
+  SHARED_LEGACY_ACTIVE_PROFILE_FILENAME,
   deleteFileIfExists,
   ensureSharedStoreDirs,
   getSharedActiveProfilePath,
+  getSharedActiveProfileFilename,
+  getLegacySharedActiveProfilePath,
   getSharedProfileSecretsPath,
   getSharedProfilesDir,
   getSharedProfilesPath,
@@ -333,8 +335,10 @@ export class ProfileManager {
     if (!this.isRemoteFilesMode()) {
       return null
     }
-    return readJsonFile<SharedActiveProfile>(
-      getSharedActiveProfilePath(this.getSharedStoreRootPath()),
+    const storeRoot = this.getSharedStoreRootPath()
+    return (
+      readJsonFile<SharedActiveProfile>(getSharedActiveProfilePath(storeRoot)) ||
+      readJsonFile<SharedActiveProfile>(getLegacySharedActiveProfilePath(storeRoot))
     )
   }
 
@@ -342,9 +346,13 @@ export class ProfileManager {
     if (!this.isRemoteFilesMode()) {
       return
     }
-    writeJsonFile(getSharedActiveProfilePath(this.getSharedStoreRootPath()), {
+    const storeRoot = this.getSharedStoreRootPath()
+    writeJsonFile(getSharedActiveProfilePath(storeRoot), {
       profileId,
       updatedAt: new Date().toISOString(),
+      machineName: getSharedActiveProfileFilename()
+        .replace(/^active-profile@/, '')
+        .replace(/\.json$/, ''),
     } satisfies SharedActiveProfile)
   }
 
@@ -352,7 +360,9 @@ export class ProfileManager {
     if (!this.isRemoteFilesMode()) {
       return
     }
-    deleteFileIfExists(getSharedActiveProfilePath(this.getSharedStoreRootPath()))
+    const storeRoot = this.getSharedStoreRootPath()
+    deleteFileIfExists(getSharedActiveProfilePath(storeRoot))
+    deleteFileIfExists(getLegacySharedActiveProfilePath(storeRoot))
   }
 
   private readRemoteProfileTokens(profileId: string): ProfileTokens | null {
@@ -1190,13 +1200,24 @@ export class ProfileManager {
       const activeWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(
           vscode.Uri.file(this.getSharedStoreRootPath()),
-          SHARED_ACTIVE_PROFILE_FILENAME,
+          getSharedActiveProfileFilename(),
         ),
       )
       activeWatcher.onDidCreate(fire)
       activeWatcher.onDidChange(fire)
       activeWatcher.onDidDelete(fire)
       disposables.push(activeWatcher)
+
+      const legacyActiveWatcher = vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(
+          vscode.Uri.file(this.getSharedStoreRootPath()),
+          SHARED_LEGACY_ACTIVE_PROFILE_FILENAME,
+        ),
+      )
+      legacyActiveWatcher.onDidCreate(fire)
+      legacyActiveWatcher.onDidChange(fire)
+      legacyActiveWatcher.onDidDelete(fire)
+      disposables.push(legacyActiveWatcher)
 
       const tokenWatcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(

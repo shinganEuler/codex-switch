@@ -41,7 +41,8 @@ imports, syncs, or writes profile data.
   When enabled, it targets the WSL-side auth file instead of the
   Windows-local file.
 * In shared SSH storage mode, it reconciles the current runtime auth file with
-  the shared active-profile marker before deciding which identity is active.
+  the machine-scoped active-profile marker before deciding which identity is
+  active.
 
 This prevents a profile saved for one environment from overwriting the
 credentials used by another environment.
@@ -61,7 +62,7 @@ File-based stores use the following layout:
 
 * `profiles.json` for profile metadata,
 * `profiles/<profile-id>.json` for per-profile auth payloads,
-* `active-profile.json` for the shared active identity marker.
+* `active-profile@<machine>.json` for the machine-scoped active identity marker.
 
 Directories are created with `0700`, files with `0600`.
 
