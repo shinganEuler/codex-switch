@@ -1,0 +1,71 @@
+<svg
+  width="128"
+  height="128"
+  viewBox="0 0 128 128"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect x="8" y="8" width="112" height="112" rx="30" fill="#F8FAFC" />
+  <rect
+    x="18"
+    y="42"
+    width="24"
+    height="46"
+    rx="10"
+    fill="#14B8A6"
+    fill-opacity="0.92"
+  />
+  <circle cx="30" cy="56" r="5" fill="#082F49" />
+  <path
+    d="M24 70C26 66 34 66 36 70"
+    stroke="#082F49"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+  <rect
+    x="52"
+    y="24"
+    width="24"
+    height="62"
+    rx="10"
+    fill="#F59E0B"
+    fill-opacity="0.92"
+  />
+  <circle cx="64" cy="40" r="5" fill="#082F49" />
+  <path
+    d="M58 54C60 50 68 50 70 54"
+    stroke="#082F49"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+  <rect
+    x="86"
+    y="36"
+    width="24"
+    height="50"
+    rx="10"
+    fill="#60A5FA"
+    fill-opacity="0.92"
+  />
+  <circle cx="98" cy="50" r="5" fill="#082F49" />
+  <path
+    d="M92 64C94 60 102 60 104 64"
+    stroke="#082F49"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+  <path
+    d="M22 98C35 93 45 85 51 74C57 62 68 55 83 52"
+    stroke="#C2410C"
+    stroke-width="8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M76 42L90 52L78 64"
+    stroke="#C2410C"
+    stroke-width="8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

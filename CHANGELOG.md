@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning][].
 ### Removed
 -->
 
+## [1.3.3][] - 2026-04-20
+
+### Changed
+
+* Rebranded the Marketplace-facing name to Codex Identity Router.
+* Replaced the extension icon and listing copy so the Marketplace entry is
+  visually and editorially distinct.
+* Rewrote the README around runtime-aware auth routing, independent identity
+  isolation, and environment-specific profile handling.
+
 ## [1.3.2][] - 2026-04-14
 
 ### Added
@@ -24,8 +34,7 @@ and this project adheres to [Semantic Versioning][].
 
 ### Changed
 
-* Rebranded the project as Codex Profile Switcher for the
-  `shinganEuler/codex-switch` fork.
+* Rebranded the project for the `shinganEuler/codex-switch` fork.
 * Switched packaging and publishing scripts from the deprecated `vsce`
   package to `@vscode/vsce`.
 * Removed `.vscodeignore` so packaging relies only on `package.json.files`,
@@ -38,6 +47,7 @@ and this project adheres to [Semantic Versioning][].
 * Automatic publishing to <https://open-vsx.org/> in the release workflow.
 
 [1.3.2]: https://github.com/shinganEuler/codex-switch/compare/v1.3.1...v1.3.2
+[1.3.3]: https://github.com/shinganEuler/codex-switch/compare/v1.3.2...v1.3.3
 [1.3.1]: https://github.com/shinganEuler/codex-switch/compare/v1.3.0...v1.3.1
 
 ## [1.3.0][] - 2026-03-16
@@ -50,10 +60,8 @@ and this project adheres to [Semantic Versioning][].
   (PR #9 by @iqdoctor)
 * Direct profile activation from tooltip.
   (PR #8 by @iqdoctor)
-* Added `Codex Profile Switcher: Export Profiles` and
-  `Codex Profile Switcher: Import Profiles`
-  for full profile backup/restore, including credentials and active/previous
-  profile selection.
+* Added export and import profile commands for full profile backup/restore,
+  including credentials and active/previous profile selection.
 
 ### Changed
 
